@@ -1,0 +1,7 @@
+{
+  "name": "Design Portfolio & Studio Admin",
+  "description": "A high-end, black and white minimalist portfolio for designers with an integrated admin management system.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
