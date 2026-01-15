@@ -40,6 +40,12 @@ const App: React.FC = () => {
     localStorage.setItem('design_portfolio_projects', JSON.stringify(updated));
   };
 
+  const updateProject = (id: string, updatedProject: Project) => {
+    const updated = projects.map(p => p.id === id ? updatedProject : p);
+    setProjects(updated);
+    localStorage.setItem('design_portfolio_projects', JSON.stringify(updated));
+  };
+
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col selection:bg-white selection:text-black">
@@ -49,7 +55,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Portfolio projects={projects} />} />
             <Route 
               path="/admin" 
-              element={<AdminPanel projects={projects} onAdd={addProject} onDelete={deleteProject} />} 
+              element={<AdminPanel projects={projects} onAdd={addProject} onDelete={deleteProject} onUpdate={updateProject} />} 
             />
           </Routes>
         </main>

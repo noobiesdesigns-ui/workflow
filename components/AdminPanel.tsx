@@ -6,9 +6,10 @@ interface AdminPanelProps {
   projects: Project[];
   onAdd: (project: Project) => void;
   onDelete: (id: string) => void;
+  onUpdate: (id: string, project: Project) => void;
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete }) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete, onUpdate }) => {
   // Authentication state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
@@ -21,20 +22,82 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete }) =>
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-<<<<<<< HEAD
-    if (username === 'noobiesdesign' && password === 'Noobies@123') {
-      setIsLoggedIn(true);
-      setAuthError('');
-    } else {
-      setAuthError('INVALID CREDENTIALS ACCESS DENIED');
-    }
-  };
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCategory, setEditCategory] = useState<Category>(CATEGORIES[0]);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+
+const handleLogin = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (username === 'noobiesdesign' && password === 'Noobies@123') {
+    setIsLoggedIn(true);
+    setAuthError('');
+  } else {
+    setAuthError('INVALID CREDENTIALS ACCESS DENIED');
+  }
+};
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleEditStart = (project: Project) => {
+    setEditingId(project.id);
+    setEditName(project.name);
+    setEditCategory(project.category);
+    setEditImageFile(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditName('');
+    setEditCategory(CATEGORIES[0]);
+    setEditImageFile(null);
+  };
+
+  const handleEditSave = async (projectId: string, currentImageUrl: string) => {
+    if (!editName) {
+      alert('Please provide a name.');
+      return;
+    }
+
+    setIsUploading(true);
+
+    if (editImageFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const updatedProject: Project = {
+          id: projectId,
+          name: editName,
+          category: editCategory,
+          imageUrl: reader.result as string,
+          timestamp: Date.now()
+        };
+        onUpdate(projectId, updatedProject);
+        handleEditCancel();
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(editImageFile);
+    } else {
+      const updatedProject: Project = {
+        id: projectId,
+        name: editName,
+        category: editCategory,
+        imageUrl: currentImageUrl,
+        timestamp: Date.now()
+      };
+      onUpdate(projectId, updatedProject);
+      handleEditCancel();
+      setIsUploading(false);
     }
   };
 
@@ -199,22 +262,106 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete }) =>
           </div>
           <div className="grid grid-cols-1 gap-4">
             {projects.map(p => (
-              <div key={p.id} className="group flex items-center justify-between p-6 bg-white/5 border border-white/10 hover:border-white/30 transition-all">
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-black overflow-hidden border border-white/10">
-                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover grayscale opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" />
+              <div key={p.id}>
+                {editingId === p.id ? (
+                  // Edit Form
+                  <div className="p-6 bg-white/5 border border-white/10">
+                    <h4 className="text-lg font-black uppercase tracking-tighter mb-6">EDIT ENTRY</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.3em] font-black mb-2 text-white/30">Name</label>
+                        <input 
+                          type="text" 
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full bg-black border border-white/10 p-4 focus:border-white outline-none transition-colors text-white text-[10px] font-black tracking-widest uppercase"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.3em] font-black mb-2 text-white/30">Category</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {CATEGORIES.map(cat => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setEditCategory(cat)}
+                              className={`p-2 text-[9px] font-black uppercase tracking-[0.15em] border transition-all ${
+                                editCategory === cat 
+                                  ? 'bg-white text-black border-white' 
+                                  : 'bg-black text-white border-white/10 hover:border-white/40'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.3em] font-black mb-2 text-white/30">New Image (Optional)</label>
+                        <label 
+                          htmlFor={`file-edit-${p.id}`}
+                          className="flex flex-col items-center justify-center w-full h-32 border border-dashed border-white/10 cursor-pointer hover:border-white/40 transition-colors bg-black/50"
+                        >
+                          <div className="flex flex-col items-center justify-center p-4 text-center">
+                            <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30">
+                              {editImageFile ? <span className="text-white">{editImageFile.name}</span> : 'UPLOAD_NEW_IMAGE'}
+                            </p>
+                          </div>
+                          <input id={`file-edit-${p.id}`} type="file" className="hidden" onChange={handleEditFileChange} accept="image/*" />
+                        </label>
+                      </div>
+
+                      <div className="flex gap-3 pt-4">
+                        <button 
+                          onClick={() => handleEditSave(p.id, p.imageUrl)}
+                          disabled={isUploading}
+                          className={`flex-1 p-3 text-[10px] font-black uppercase tracking-[0.3em] transition-all border ${
+                            isUploading 
+                              ? 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed' 
+                              : 'bg-white text-black hover:bg-transparent hover:text-white border-white'
+                          }`}
+                        >
+                          {isUploading ? 'SAVING...' : 'SAVE'}
+                        </button>
+                        <button 
+                          onClick={handleEditCancel}
+                          className="flex-1 p-3 text-[10px] font-black uppercase tracking-[0.3em] border border-white/20 text-white/40 hover:text-white hover:border-white transition-all"
+                        >
+                          CANCEL
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-black uppercase tracking-tighter text-lg leading-tight mb-1">{p.name}</h4>
-                    <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em]">{p.category}</p>
+                ) : (
+                  // Display View
+                  <div className="group flex items-center justify-between p-6 bg-white/5 border border-white/10 hover:border-white/30 transition-all">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 bg-black overflow-hidden border border-white/10">
+                        <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover grayscale opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-black uppercase tracking-tighter text-lg leading-tight mb-1">{p.name}</h4>
+                        <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em]">{p.category}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => handleEditStart(p)}
+                        className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400 hover:text-blue-300 p-3 px-6 border border-blue-900/30 hover:border-blue-500/40 transition-all bg-blue-500/5"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => onDelete(p.id)}
+                        className="text-[9px] font-black uppercase tracking-[0.2em] text-red-900 hover:text-red-500 p-3 px-6 border border-red-900/10 hover:border-red-500/40 transition-all bg-red-500/5"
+                      >
+                        Terminate
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <button 
-                  onClick={() => onDelete(p.id)}
-                  className="text-[9px] font-black uppercase tracking-[0.2em] text-red-900 hover:text-red-500 p-3 px-6 border border-red-900/10 hover:border-red-500/40 transition-all bg-red-500/5"
-                >
-                  Terminate
-                </button>
+                )}
               </div>
             ))}
           </div>
