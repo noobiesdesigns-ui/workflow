@@ -6,10 +6,16 @@ interface AdminPanelProps {
   projects: Project[];
   onAdd: (project: Project) => void;
   onDelete: (id: string) => void;
+<<<<<<< HEAD
   onUpdate: (id: string, project: Project) => void;
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete, onUpdate }) => {
+=======
+}
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete }) => {
+>>>>>>> a81fc84da782210867db19e3900968544c1886f3
   // Authentication state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
@@ -22,6 +28,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete, onUp
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+<<<<<<< HEAD
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -37,6 +44,24 @@ const handleLogin = (e: React.FormEvent) => {
     setAuthError('INVALID CREDENTIALS ACCESS DENIED');
   }
 };
+=======
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Trim whitespace and compare
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+    
+    if (trimmedUsername === 'noobiesdesign' && trimmedPassword === 'Noobies@123') {
+      setIsLoggedIn(true);
+      setAuthError('');
+      setUsername('');
+      setPassword('');
+    } else {
+      setAuthError('INVALID CREDENTIALS ACCESS DENIED');
+      setPassword(''); // Clear password on error
+    }
+  };
+>>>>>>> a81fc84da782210867db19e3900968544c1886f3
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -44,6 +69,7 @@ const handleLogin = (e: React.FormEvent) => {
     }
   };
 
+<<<<<<< HEAD
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setEditImageFile(e.target.files[0]);
@@ -101,6 +127,8 @@ const handleLogin = (e: React.FormEvent) => {
     }
   };
 
+=======
+>>>>>>> a81fc84da782210867db19e3900968544c1886f3
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !imageFile) {
@@ -262,6 +290,7 @@ const handleLogin = (e: React.FormEvent) => {
           </div>
           <div className="grid grid-cols-1 gap-4">
             {projects.map(p => (
+<<<<<<< HEAD
               <div key={p.id}>
                 {editingId === p.id ? (
                   // Edit Form
@@ -362,6 +391,24 @@ const handleLogin = (e: React.FormEvent) => {
                     </div>
                   </div>
                 )}
+=======
+              <div key={p.id} className="group flex items-center justify-between p-6 bg-white/5 border border-white/10 hover:border-white/30 transition-all">
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 bg-black overflow-hidden border border-white/10">
+                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover grayscale opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-black uppercase tracking-tighter text-lg leading-tight mb-1">{p.name}</h4>
+                    <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em]">{p.category}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => onDelete(p.id)}
+                  className="text-[9px] font-black uppercase tracking-[0.2em] text-red-900 hover:text-red-500 p-3 px-6 border border-red-900/10 hover:border-red-500/40 transition-all bg-red-500/5"
+                >
+                  Terminate
+                </button>
+>>>>>>> a81fc84da782210867db19e3900968544c1886f3
               </div>
             ))}
           </div>
