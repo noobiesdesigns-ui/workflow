@@ -23,6 +23,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ projects, onAdd, onDelete }) =>
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+<<<<<<< HEAD
     if (username === 'noobiesdesign' && password === 'Noobies@123') {
       setIsLoggedIn(true);
       setAuthError('');
